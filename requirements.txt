@@ -1,4 +1,4 @@
-flask==2.3.3
+flask==2.2.5
 gunicorn==21.2.0
 torch>=1.13.0
 torchaudio>=0.13.0

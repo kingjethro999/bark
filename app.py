@@ -33,6 +33,8 @@ def health_check():
 @app.route('/generate', methods=['POST'])
 def generate_speech():
     """Generate speech from text using Bark"""
+    ensure_models_loaded()  # Load models if not already loaded
+    
     try:
         # Get JSON data
         data = request.get_json()
@@ -84,15 +86,21 @@ def list_voices():
     ]
     return jsonify({"voices": voices})
 
-@app.before_first_request
-def startup():
-    """Load models when the app starts"""
-    load_models()
+def ensure_models_loaded():
+    """Ensure models are loaded before processing requests"""
+    global models_loaded
+    if not models_loaded:
+        load_models()
 
 if __name__ == '__main__':
-    # Load models on startup
-    load_models()
+    # Load models on startup when running directly
+    try:
+        load_models()
+    except Exception as e:
+        logging.error(f"Failed to load models at startup: {e}")
     
     # Run the app
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port, debug=False) 
+    app.run(host='0.0.0.0', port=port, debug=False)
+
+# For production deployment, models will be loaded on first request 
