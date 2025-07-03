@@ -18,7 +18,16 @@ def load_models():
     if not models_loaded:
         logging.info("Loading Bark models...")
         try:
-            preload_models()
+            # Load only essential models to reduce memory usage
+            preload_models(
+                text_use_gpu=False,
+                text_use_small=True,  # Use smaller text model
+                coarse_use_gpu=False,
+                coarse_use_small=True,  # Use smaller coarse model
+                fine_use_gpu=False,
+                fine_use_small=True,  # Use smaller fine model
+                codec_use_gpu=False
+            )
             models_loaded = True
             logging.info("Bark models loaded successfully!")
         except Exception as e:
@@ -53,8 +62,13 @@ def generate_speech():
         
         logging.info(f"Generating audio for text: {text[:50]}...")
         
-        # Generate audio
-        audio_array = generate_audio(text, history_prompt=voice_preset)
+        # Generate audio with memory optimization
+        audio_array = generate_audio(
+            text, 
+            history_prompt=voice_preset,
+            text_temp=0.7,  # Lower temperature for stability
+            waveform_temp=0.7
+        )
         
         # Convert to wav format
         buffer = io.BytesIO()
